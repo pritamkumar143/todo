@@ -25,9 +25,9 @@ const App = () => {
   };
 
   // Handle deleting a task
-  // const deleteTask = (id) => {
-  //   setTasks(tasks.filter((task) => task.id !== id)); // Remove task by filtering
-  // };
+  const deleteTask = (id) => {
+    setTasks(tasks.filter((task) => task.id !== id)); // Remove task by filtering
+  };
 
   return (
     <div className="border-t-2 w-screen h-screen bg-zinc-800 flex items-center flex-col">
@@ -83,7 +83,7 @@ const App = () => {
               <i className="ri-file-edit-line"></i>
               <i
                 className="ri-delete-bin-3-line cursor-pointer"
-              // onClick={() => deleteTask(task.id)} // Delete task on click
+              onClick={() => deleteTask(task.id)} // Delete task on click
               ></i>
             </div>
           </li>
