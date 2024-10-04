@@ -1,96 +1,148 @@
-import React, { useState } from 'react';
-
+import { nanoid } from "nanoid";
+import { useState } from "react";
 
 const App = () => {
-  const [tasks, setTasks] = useState([
-    { id: 1, name: 'Task 1', completed: false },
-    { id: 2, name: 'Task 2', completed: true },
-    { id: 3, name: 'Task 3', completed: false },
-  ]);
-  const [newTask, setNewTask] = useState('');
+    // Temporary database for tasks
+    const [tasks, settasks] = useState([]);
 
-  // Handle adding a new task
-  const addTask = (e) => {
-    e.preventDefault();
-    if (newTask.trim() === '') return;
+    const [title, settitle] = useState("");
+    const [editingIndex, setEditingIndex] = useState(null);
+    const [editedTitle, setEditedTitle] = useState("");
 
-    const task = {
-      id: tasks.length + 1,
-      name: newTask,
-      completed: false,
+    const SubmitHandler = (e) => {
+        e.preventDefault();
+        const task = {
+            title: title,
+            completed: false,
+            id: nanoid(),
+        };
+        settasks([...tasks, task]);
+        settitle("");
     };
 
-    setTasks([...tasks, task]); // Add the new task to the tasks array
-    setNewTask(''); // Clear the input field after adding the task
-  };
+    const ToggleHandler = (index) => {
+        const copytasks = [...tasks];
+        copytasks[index].completed = !copytasks[index].completed;
+        settasks(copytasks);
+    };
 
-  // Handle deleting a task
-  const deleteTask = (id) => {
-    setTasks(tasks.filter((task) => task.id !== id)); // Remove task by filtering
-  };
+    const DeleteHandler = (index) => {
+        if (tasks[index].completed || confirm("Are you sure?")) {
+            const copytasks = [...tasks];
+            copytasks.splice(index, 1);
+            settasks(copytasks);
+        } else {
+            alert("Task not deleted!");
+            return;
+        }
+    };
 
-  return (
-    <div className="border-t-2 w-screen h-screen bg-zinc-800 flex items-center flex-col">
-      <div className="mt-[7%] w-[90%] md:w-[50%] lg:w-[25%] h-[20%] border rounded-3xl flex justify-around items-center">
-        <div className="text-yellow-100">
-          <h1 className="text-3xl font-bold">LETS TODO</h1>
-          <p>Keeps doing things</p>
-        </div>
-        <div className="text-4xl p-6 font-extrabold flex  justify-center items-center w-[120px] h-[120px] rounded-full bg-orange-600">
-          {tasks.length} Task
-          {/* <h1>Task</h1> */}
-        </div>
-      </div>
+    const startEditing = (index) => {
+        setEditingIndex(index);
+        setEditedTitle(tasks[index].title); // Set the current task title in the input
+    };
 
-      {/* Task Input */}
-      <form onSubmit={addTask} className="w-[90%] md:w-[50%] lg:w-[25%] flex justify-between px-5 my-[2%]">
-        <input
-          value={newTask}
-          onChange={(e) => setNewTask(e.target.value)} // Update the input value
-          placeholder="Write your next task..."
-          className="px-5 py-3 text-yellow-100 outline-none w-[80%] md:w-[85%] rounded-xl bg-zinc-700"
-          type="text"
-        />
-        <button
-          type="submit"
-          className="outline-none text-4xl font-extrabold flex justify-center items-center w-[50px] h-[50px] rounded-full bg-orange-600"
-        >
-          <i className="ri-add-fill"></i>
-        </button>
-      </form>
+    const saveEditedTask = (index) => {
+        const copytasks = [...tasks];
+        copytasks[index].title = editedTitle;
+        settasks(copytasks);
+        setEditingIndex(null); // Exit edit mode
+    };
 
-      {/* Task List */}
-      <ul className="list-none w-[90%] md:w-[50%] lg:w-[25%]">
-        {tasks.map((task) => (
-          <li
-            key={task.id}
-            className="mb-5 flex justify-between items-center border rounded-xl p-5"
-          >
-            <div className="flex items-center">
-              <div
-                className={`mr-4 rounded-full w-[30px] h-[30px] ${task.completed ? 'bg-green-400' : 'border border-orange-600'
-                  }`}
-              ></div>
-              <h1
-                className={`text-2xl font-extrabold text-yellow-100 ${task.completed ? 'line-through' : ''
-                  }`}
-              >
-                {task.name}
-              </h1>
+    return (
+        <div className="border-t-2 w-screen h-screen bg-zinc-800 flex items-center flex-col">
+            <div className="mt-[7%] w-[25%] h-[20%] border rounded-3xl flex justify-around items-center">
+                <div className="text-yellow-100">
+                    <h1 className="text-3xl font-bold">LETS TODO</h1>
+                    <p>Keeps doing things</p>
+                </div>
+                <div className="text-4xl font-extrabold flex justify-center items-center w-[120px] h-[120px] rounded-full bg-orange-600">
+                    {tasks.filter((task) => task.completed).length}/{tasks.length}
+                </div>
             </div>
-            <div className="flex gap-3 text-2xl text-yellow-100">
-              {/* Edit and Delete Icons */}
-              <i className="ri-file-edit-line"></i>
-              <i
-                className="ri-delete-bin-3-line cursor-pointer"
-              onClick={() => deleteTask(task.id)} // Delete task on click
-              ></i>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+
+            {/* Task input */}
+            <form
+                onSubmit={SubmitHandler}
+                className="w-[25%] flex justify-between px-5 my-[2%]"
+            >
+                <input
+                    placeholder="Write your next task..."
+                    className="px-5 py-3 text-yellow-100 outline-none w-[85%] rounded-xl bg-zinc-700"
+                    type="text"
+                    onChange={(e) => settitle(e.target.value)}
+                    value={title}
+                />
+                <button className="outline-none text-4xl font-extrabold flex justify-center items-center w-[50px] h-[50px] rounded-full bg-orange-600">
+                    <i className="ri-add-fill"></i>
+                </button>
+            </form>
+
+            {/* Task List */}
+            <ul className="list-none w-[25%]">
+                {tasks.length > 0 ? (
+                    tasks.map((task, index) => (
+                        <li
+                            key={task.id}
+                            className="mb-5 flex justify-between items-center border rounded-xl p-5"
+                        >
+                            <div className="flex items-center">
+                                {/* Toggle completion status */}
+                                <div
+                                    onClick={() => ToggleHandler(index)}
+                                    className={`${task.completed
+                                            ? "bg-green-400"
+                                            : "border border-orange-600"
+                                        } mr-4 rounded-full w-[30px] h-[30px] cursor-pointer`}
+                                ></div>
+
+                                {/* Show input if editing, otherwise show task title */}
+                                {editingIndex === index ? (
+                                    <input
+                                        type="text"
+                                        value={editedTitle}
+                                        onChange={(e) => setEditedTitle(e.target.value)}
+                                        className="text-2xl font-extrabold text-yellow-100 bg-zinc-700 px-2 py-1 rounded-md"
+                                    />
+                                ) : (
+                                    <h1
+                                        className={`${task.completed ? "line-through" : ""
+                                            } text-2xl font-extrabold text-yellow-100`}
+                                    >
+                                        {task.title}
+                                    </h1>
+                                )}
+                            </div>
+                            <div className="flex gap-3 text-2xl text-yellow-100">
+                                {/* Edit and Save Icons */}
+                                {editingIndex === index ? (
+                                    <i
+                                        className="ri-save-line cursor-pointer"
+                                        onClick={() => saveEditedTask(index)}
+                                    ></i>
+                                ) : (
+                                    <i
+                                        className="ri-file-edit-line cursor-pointer"
+                                        onClick={() => startEditing(index)}
+                                    ></i>
+                                )}
+
+                                {/* Delete Icon */}
+                                <i
+                                    onClick={() => DeleteHandler(index)}
+                                    className="ri-delete-bin-3-line cursor-pointer"
+                                ></i>
+                            </div>
+                        </li>
+                    ))
+                ) : (
+                    <h1 className="mt-5 text-yellow-100 text-2xl font-extrabold text-center">
+                        No Task Found
+                    </h1>
+                )}
+            </ul>
+        </div>
+    );
 };
 
 export default App;
