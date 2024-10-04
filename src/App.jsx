@@ -1,13 +1,23 @@
 import { nanoid } from "nanoid";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const App = () => {
-    // Temporary database for tasks
-    const [tasks, settasks] = useState([]);
+    // Load tasks from localStorage (if any)
+    const loadTasks = () => {
+        const storedTasks = localStorage.getItem("tasks");
+        return storedTasks ? JSON.parse(storedTasks) : [];
+    };
 
+    // Temporary database for tasks
+    const [tasks, settasks] = useState(loadTasks());
     const [title, settitle] = useState("");
     const [editingIndex, setEditingIndex] = useState(null);
     const [editedTitle, setEditedTitle] = useState("");
+
+    // Save tasks to localStorage whenever tasks change
+    useEffect(() => {
+        localStorage.setItem("tasks", JSON.stringify(tasks));
+    }, [tasks]);
 
     const SubmitHandler = (e) => {
         e.preventDefault();
@@ -64,11 +74,11 @@ const App = () => {
             {/* Task input */}
             <form
                 onSubmit={SubmitHandler}
-                className="w-[25%] flex justify-between px-5 my-[2%]"
+                className="w-[25%] relative  flex justify-between px-5 my-[2%]"
             >
                 <input
                     placeholder="Write your next task..."
-                    className="px-5 py-3 text-yellow-100 outline-none w-[85%] rounded-xl bg-zinc-700"
+                    className="px-5 py-3 text-yellow-100  outline-none w-[85%] rounded-xl bg-zinc-700"
                     type="text"
                     onChange={(e) => settitle(e.target.value)}
                     value={title}
@@ -79,20 +89,20 @@ const App = () => {
             </form>
 
             {/* Task List */}
-            <ul className="list-none w-[25%]">
+            <ul className="list-none w-[25%]  relative">
                 {tasks.length > 0 ? (
                     tasks.map((task, index) => (
                         <li
                             key={task.id}
                             className="mb-5 flex justify-between items-center border rounded-xl p-5"
                         >
-                            <div className="flex items-center">
+                            <div className="flex  items-center relative">
                                 {/* Toggle completion status */}
                                 <div
                                     onClick={() => ToggleHandler(index)}
                                     className={`${task.completed
-                                            ? "bg-green-400"
-                                            : "border border-orange-600"
+                                        ? "bg-green-400"
+                                        : "border border-orange-600"
                                         } mr-4 rounded-full w-[30px] h-[30px] cursor-pointer`}
                                 ></div>
 
@@ -102,7 +112,7 @@ const App = () => {
                                         type="text"
                                         value={editedTitle}
                                         onChange={(e) => setEditedTitle(e.target.value)}
-                                        className="text-2xl font-extrabold text-yellow-100 bg-zinc-700 px-2 py-1 rounded-md"
+                                        className=" w-[70%]   h-8 text-2xl font-extrabold text-yellow-100 bg-zinc-700  rounded-md"
                                     />
                                 ) : (
                                     <h1
